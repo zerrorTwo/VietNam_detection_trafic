@@ -1,44 +1,60 @@
-Traffic Sign Recognition in Vietnam using YOLOv8
-This project implements YOLOv8 for detecting and classifying 58 Vietnamese traffic signs, trained on the Vietnam-Traffic-Sign-Detection dataset, with a Streamlit UI for image and video inference.
-Setup
+# Nhận Diện Biển Báo Giao Thông Việt Nam
 
-Create a virtual environment (recommended):
+Ứng dụng nhận diện biển báo giao thông Việt Nam sử dụng YOLOv8, có khả năng phát hiện và phân loại 58 loại biển báo giao thông phổ biến tại Việt Nam.
+
+## Tính năng
+
+- Nhận diện biển báo giao thông từ hình ảnh
+- Nhận diện biển báo giao thông từ video
+- Hiển thị tên đầy đủ của biển báo bằng tiếng Việt
+- Điều chỉnh ngưỡng độ tin cậy
+- Giao diện web thân thiện với người dùng
+
+## Cài đặt
+
+1. Tạo môi trường ảo (khuyến nghị):
+
+```bash
 python -m venv venv
-source venv/Scripts/activate # Windows
+source venv/Scripts/activate  # Windows
+```
 
-Install dependencies:
+2. Cài đặt các thư viện cần thiết:
+
+```bash
 pip install -r requirements.txt
+```
 
-Prepare dataset:
+## Sử dụng
 
-Extract the dataset to data/raw_dataset/. The dataset should have folders train/, valid/, test/, each containing images/ and labels/, plus a data.yaml file.
-Run the data preparation script:python utils/data_preparation.py
+1. Chạy ứng dụng Streamlit:
 
-Copy data.yaml from data/raw_dataset/ to data/data.yaml and update paths to:train: ./data/images/train
-val: ./data/images/val
-test: ./data/images/test
-
-Train the model:
-python train.py
-
-Run the Streamlit app:
+```bash
 streamlit run app.py
+```
 
-Usage
+2. Mở trình duyệt web và truy cập địa chỉ: http://localhost:8501
 
-Open the Streamlit app in your browser (http://localhost:8501).
-Upload an image (JPG, JPEG, PNG) or video (MP4, AVI, MOV).
-Adjust the confidence threshold in the sidebar if needed.
-View the results with bounding boxes and labels.
+3. Sử dụng ứng dụng:
+   - Tải lên hình ảnh (JPG, JPEG, PNG) hoặc video (MP4, AVI, MOV)
+   - Điều chỉnh ngưỡng độ tin cậy trong thanh bên nếu cần
+   - Xem kết quả với các khung bao quanh và nhãn biển báo
+   - Đối với video, bạn có thể:
+     - Bắt đầu xử lý video
+     - Dừng xử lý bất cứ lúc nào
+     - Xem tiến độ xử lý
+     - Tải xuống video đã xử lý
 
-Notes
+## Lưu ý
 
-The model uses YOLOv8 (nano version) with pre-trained weights (yolov8n.pt).
-Ensure data.yaml matches the dataset's 58 classes.
-Use Python 3.12 or compatible versions (3.8-3.12).
-Use a GPU for faster training and inference.
-Trained model weights are saved in runs/train/exp/weights/best.pt.
-If errors occur, check file paths, dataset structure, and model weights.
+- Sử dụng Python 3.12 hoặc các phiên bản tương thích (3.8-3.12)
+- Khuyến nghị sử dụng GPU để tăng tốc độ xử lý
+- Đảm bảo có đủ dung lượng ổ đĩa để lưu trữ video đã xử lý
+- Nếu gặp lỗi, hãy kiểm tra:
+  - Đường dẫn file
+  - Cấu trúc thư mục
+  - Trọng số mô hình
 
-License
+## Giấy phép
+
 MIT License
