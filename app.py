@@ -6,13 +6,27 @@ from utils.inference import process_image, process_video
 import time
 import threading
 import queue
+import base64
 
 st.set_page_config(page_title="Traffic Sign Recognition", layout="wide")
 st.title("Nhận Diện Biển Báo Giao Thông Việt Nam")
 
+# Hàm để lấy đường dẫn tuyệt đối
+def get_absolute_path(relative_path):
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), relative_path))
+
+# Hàm để hiển thị video
+def show_video(video_path):
+    try:
+        with open(video_path, "rb") as f:
+            video_bytes = f.read()
+        st.video(video_bytes)
+    except Exception as e:
+        st.error(f"Không thể phát video: {str(e)}")
+
 # Đọc cấu hình dataset
 try:
-    with open("./data/data.yaml", "r") as f:
+    with open(get_absolute_path("./data/data.yaml"), "r") as f:
         data_config = yaml.safe_load(f)
     class_names = data_config["names"]
 except FileNotFoundError:
@@ -109,13 +123,14 @@ if uploaded_file is not None:
     # Xử lý hình ảnh
     if file_extension in ["jpg", "jpeg", "png"]:
         try:
-            with open("temp_image.jpg", "wb") as f:
+            temp_image_path = get_absolute_path("temp_image.jpg")
+            with open(temp_image_path, "wb") as f:
                 f.write(uploaded_file.read())
 
             with st.spinner("Đang xử lý hình ảnh..."):
                 result_img, detected_codes = process_image(
-                    image_path="temp_image.jpg",
-                    model_path="runs/train/exp/weights/best.pt",
+                    image_path=temp_image_path,
+                    model_path=get_absolute_path("runs/train/exp/weights/best.pt"),
                     class_names=class_names,
                     class_names_full=class_names_full,
                     conf_threshold=conf_threshold,
@@ -125,7 +140,7 @@ if uploaded_file is not None:
             with col1:
                 st.image(result_img, channels="BGR", caption="Kết quả nhận diện")
 
-            os.remove("temp_image.jpg")
+            os.remove(temp_image_path)
         except Exception as e:
             st.error(f"Lỗi khi xử lý hình ảnh: {str(e)}")
 
@@ -140,7 +155,8 @@ if uploaded_file is not None:
             controls_placeholder = st.empty()
 
             # Lưu video tạm thời
-            with open("temp_video.mp4", "wb") as f:
+            temp_video_path = get_absolute_path("temp_video.mp4")
+            with open(temp_video_path, "wb") as f:
                 f.write(uploaded_file.read())
 
             # Tạo nút điều khiển
@@ -165,12 +181,13 @@ if uploaded_file is not None:
                 progress_text.text(f"Tiến độ: {progress:.1f}%")
 
                 # Xử lý video và cập nhật tiến độ
+                output_path = get_absolute_path("output/output.mp4")
                 for progress in process_video(
-                    video_path="temp_video.mp4",
-                    model_path="runs/train/exp/weights/best.pt",
+                    video_path=temp_video_path,
+                    model_path=get_absolute_path("runs/train/exp/weights/best.pt"),
                     class_names=class_names,
                     class_names_full=class_names_full,
-                    output_path="output.mp4",
+                    output_path=output_path,
                     conf_threshold=conf_threshold,
                     stop_flag=st.session_state.stop_flag
                 ):
@@ -184,16 +201,19 @@ if uploaded_file is not None:
                     # Hiển thị thông báo hoàn thành
                     status_placeholder.success("✅ Xử lý video hoàn tất!")
                     
-                    # Hiển thị kết quả ở cột trái
-                    with col1:
-                        st.video("output.mp4")
+                    # Tạo đường dẫn tuyệt đối và hiển thị link
+                    abs_output_path = os.path.abspath(output_path)
+                    st.markdown(f"### Video đã xử lý")
+                    st.markdown(f"Video đã được lưu tại: `{abs_output_path}`")
+                    st.markdown(f"[Click để mở video](file://{abs_output_path})")
+                    
+                    # Hiển thị thông tin thêm
+                    st.info("💡 Lưu ý: Nếu không mở được video bằng cách click, bạn có thể copy đường dẫn và mở trực tiếp từ thư mục.")
                 else:
                     status_placeholder.warning("⚠️ Đã dừng xử lý video!")
 
                 # Xóa file tạm
-                os.remove("temp_video.mp4")
-                if os.path.exists("output.mp4"):
-                    os.remove("output.mp4")
+                os.remove(temp_video_path)
 
         except Exception as e:
             st.error(f"Lỗi khi xử lý video: {str(e)}")
